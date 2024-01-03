@@ -16,3 +16,5 @@
 
 # Built Visual Studio Code Extensions
 *.vsix
+# Cahche files
+__pycache__/*
