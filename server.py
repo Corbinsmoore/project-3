@@ -3,6 +3,6 @@ import data_logic
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/all")
 def all_data():
     return data_logic.get_all_data()
