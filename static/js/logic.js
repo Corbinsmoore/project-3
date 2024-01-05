@@ -89,137 +89,32 @@ d3.json(url_cjj).then(function(data) {
 
 // ***** START Joseph's Part **************************
 // get data
-url_cjj = "http://127.0.0.1:5000/cjj"
-// fetch json data
+url_cjj = "/cjj"
+// fetch and filter json data
 d3.json(url_cjj).then(function(data) {
-  console.log(data);
-});
-// set up basemap layers
-// might need to change geoJson to Json ?
-var map = L.map('map').setView([37.8, -96], 4);
+  console.log(data)
+  const result = data.filter((item) => (item.name == name && item.year == year))
+  console.log(result)
+  let map = L.map('map').setView([37.8, -96], 4);
 
-var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-
-L.geoJson(url_cjj).addTo(map);
-
+});
 // setting choropleth colors
 // colors along with RANGES for number of applications for the chosen name can be reset as we see fit... might not populate any meaningful visuals yet
-function getColor(number_app) {
-  return number_app > 1000 ? '#980043' :
-         number_app > 500  ? '#dd1c77' :
-         number_app > 200  ? '#df65b0' :
-         number_app > 100  ? '#d7b5d8' :
-         number_app > 50   ? '#f1eef6' :
+function getColor(name) {
+  return name > 1000 ? '#980043' :
+         name > 500  ? '#dd1c77' :
+         name > 200  ? '#df65b0' :
+         name > 100  ? '#d7b5d8' :
+         name > 50   ? '#f1eef6' :
                             '#0a0a0a';
 }
-// define styling function for json so fillColor depends on feature.properties.density (relative density of chosen name in each state)
-function style(feature) {
-  return {
-    fillColor: getColor(feature.properties.density),
-    weight: 2,
-    opacity: 1,
-    color: 'white',
-    dashArray: '3',
-    fillOpacity: 0.7
-  };
-}
-
-L.geoJson(url_cjj, {style: style}).addTo(map);
-
-// create interactive hover element
-function highlightFeature(hover) {
-  var layer = hover.target;
-
-  layer.setStyle({
-    weight: 5,
-    color: '#666',
-    dashArray: '',
-    fillOpacity: 0.7
-  });
-  layer.bringToFront();
-}
-
-// define style reset 
-function resetHighlight(hover) {
-  geojson.resetStyle(hover.target);
-}
+// add basemap layer
 
 
-// create zoom to state click function
-function zoomToFeature(hover) {
-  map.fitBounds(hover.target.getBounds());
-}
 
-// add interactive elements
-function onEachFeature(feature, layer) {
-  layer.on({
-    mouseover: highlightFeature,
-    mouseout: resetHighlight,
-    click: zoomToFeature
-  });
-}
 
-geojson = L.geoJson(url_cjj, {
-  style: style,
-  onEachFeature: onEachFeature
-}).addTo(map);
 
-// custom info control // don't forget to add CSS styling
-<<<<<<< HEAD
-
-// custom legend control
-=======
-var info = L.control();
-
-info.onAdd = function (map) {
-  this._div = L.DomUtil.create('div', 'info'); //to create a div with a class "info"
-  this.update();
-  return this._div
-};
-
-// update the control based on feature properties passed
-// need to reformat so its raw count instead of density
-info.update = function (props) {
-  this._div.innerHTML = '<h4>Density of Social Security Applications for Selected Name</h4>' + (props ?
-    '<b>' + props.name + '</b><br />' + props.density + ' applications / mi<sup>2</sup>'
-    : 'Hover over a state');
-};
-
-info.addTo(map);
-
-// update control so when hovering over state functions are modified
-function highlightFeature(hover) {
-  info.update(layer.feature.properties);
-}
-
-function resetHighlight(hover) {
-  info.update();
-}
-
-// custom legend control
-var legend = L.control({position: 'bottomright'});
-
-legend.onAdd = function (map) {
-  var div = L.DomUtil.create('div', 'info legend'),
-      grades = [0, 50, 100, 200, 500, 1000], // edit these ranges along with the color ranges depending on what our counts are looking like for each name
-      labels = [];
-
-// loop through name count intervals and generate a label with a colored square for each interval
-for (var i = 0; i < grades.length; i++) {
-  div.innerHTML +=
-      '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-      grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
-}
-
-return div;
-};
-
-legend.addTo(map);
-
-// retrieve the data // all top 10 names or just corbin/joseph/jacob?
-
-// ********* END Joseph's Part **************
->>>>>>> main

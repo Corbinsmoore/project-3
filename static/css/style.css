@@ -3,10 +3,15 @@ body {
     margin: 0;
   }
 #cjj {
-  width: 100%
+  width: 100%;
 }
 
 /* Joseph's Part */
+
+/* map visualization, customize scale */
+#map {
+  height: 600px;
+}
 
 /* CSS styling for map hover */
 .info {
@@ -21,6 +26,7 @@ body {
   margin: 0 0 5px;
   color: #777;
 }
+
 
 /* CSS styling for map legend */
 .legend {
