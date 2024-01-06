@@ -102,6 +102,16 @@ d3.json(url_cjj).then(function(data) {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 });
+
+
+
+
+
+
+
+
+
+
 // setting choropleth colors
 // colors along with RANGES for number of applications for the chosen name can be reset as we see fit... might not populate any meaningful visuals yet
 function getColor(name) {
