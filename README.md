@@ -6,3 +6,5 @@ To safeguard privacy, the Social Security Administration restricts names to thos
 The bar graphs will tell us the top ten most popular names, by year, based on the numher of social security applicants. 
 A choropleth map was creeated to allow users to see the popularity of certain names, per state. The deeper the hue on the map, the higher the concentration of that name.
 An interactive line graph was also created to show general popularity trends for the names of our group members. You can choose to look at all three names together or focus on 1 of the 3- to get a more in-depth look at the data. 
+
+methods: html/css, javascript. python, sqlite, and json
