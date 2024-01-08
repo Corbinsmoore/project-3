@@ -89,40 +89,78 @@ d3.json(url_cjj).then(function(data) {
 
 // ***** START Joseph's Part **************************
 // get data
-url_cjj = "/cjj"
-// fetch and filter json data
-d3.json(url_cjj).then(function(data) {
-  console.log(data)
-  const result = data.filter((item) => (item.name == name && item.year == year))
-  console.log(result)
-  let map = L.map('map').setView([37.8, -96], 4);
+// url_cjj = "/cjj"
+// // fetch and filter json data
+// d3.json(url_cjj).then(function(data) {
+//   console.log(data)
+//   const result = data.filter((item) => (item.name == name && item.year == year))
+//console.log(result)
+let map = L.map('map').setView([37.8, -96], 4);
 
-  let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
-});
+
+let geoData = "static/data/state_boundaries.json"
+
+// Defined outside function so this variable can be used in other places in the code
+let geojson;
+
+// Grab data with d3
+d3.json(geoData).then(function(data) {
+console.log(data)
+geojson = L.geoJson(data,{
+  style: customStyles,
 
 
 
+}).addTo(map);
+})
 
 
-
-
-
-
-
-// setting choropleth colors
-// colors along with RANGES for number of applications for the chosen name can be reset as we see fit... might not populate any meaningful visuals yet
-function getColor(name) {
-  return name > 1000 ? '#980043' :
-         name > 500  ? '#dd1c77' :
-         name > 200  ? '#df65b0' :
-         name > 100  ? '#d7b5d8' :
-         name > 50   ? '#f1eef6' :
-                            '#0a0a0a';
+// sets the shape properties (colors, lines, etc)
+// only runs once when the map loads
+function customStyles(feature){
+let nameSelected = document.querySelector('#names').value;
+let yearSelected = document.querySelector('#years').value;
+  return {
+   // fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
+    fillColor: getColor(eval(`feature.properties.CENSUSAREA`)),
+    weight: 2,
+    opacity: 1,
+    color: 'white',
+    dashArray: '1',
+    fillOpacity: 0.7
+  };
 }
-// add basemap layer
+
+// only chnages the color
+// note scale does not change with dropdown change
+function getColor(d) {
+  return d > 200000   ? '#800026' :
+          d > 100000   ? '#BD0026' :
+          d > 50000   ? '#E31A1C' :
+          d > 25000   ? '#FC4E2A' :
+          d > 12500   ? '#FD8D3C' :
+          d > 6250   ? '#FEB24C' :
+          d > 3125   ? '#FED976' :
+                    '#FFEDA0';
+}
+
+
+
+// // setting choropleth colors
+// // colors along with RANGES for number of applications for the chosen name can be reset as we see fit... might not populate any meaningful visuals yet
+// function getColor(name) {
+//   return name > 1000 ? '#980043' :
+//          name > 500  ? '#dd1c77' :
+//          name > 200  ? '#df65b0' :
+//          name > 100  ? '#d7b5d8' :
+//          name > 50   ? '#f1eef6' :
+//                             '#0a0a0a';
+// }
+// // add basemap layer
 
 
 
