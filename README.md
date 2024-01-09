@@ -17,4 +17,4 @@ THe project posesses a flask backend with interactive api routes, html menus and
 
 methods: html/css, javascript. python, sqlite, jupyter notebook and json
 
-Sources: TA Erin helped create the chloropleth map with us and past assignments were referenced (i.e gree gods assignment) for the bar graph.
+Sources: TA Erin helped create the chloropleth map with us and past assignments were referenced (i.e greek gods assignment) for the bar graph.
