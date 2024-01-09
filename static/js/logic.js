@@ -95,6 +95,7 @@ d3.json(url_cjj).then(function(data) {
 //   console.log(data)
 //   const result = data.filter((item) => (item.name == name && item.year == year))
 //console.log(result)
+
 let map = L.map('map').setView([37.8, -96], 4);
 
 let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -102,31 +103,58 @@ let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
-let geoData = "static/data/state_boundaries.json"
-
 // Defined outside function so this variable can be used in other places in the code
 let geojson;
 
-// Grab data with d3
-d3.json(geoData).then(function(data) {
-console.log(data)
-geojson = L.geoJson(data,{
-  style: customStyles,
+let geoData = "C:\Users\joemd\Desktop\project-3\static\data\AllData.geojson"
 
+//let's see what this does!
+// Event Listener that enacts when the dropdown changes
+let year = document.querySelector('#sel_year');
+      year.addEventListener('change', function(){
+        //update the map based on year
+        selectDataSource(geoData)
+      });
 
+d3.json(geoData).then(function (data) {
+  // Store the GeoJSON data in the geojson variable
+  geojson = L.geoJson(data, {
+    style: customStyles,
+  }).addTo(map);
+});
 
-}).addTo(map);
-})
+// Update the map based on the selected year
+function selectDataSource(geoData){
 
+  // grabs value from dropdown - I could have used D3 instead
+  // note: this is just overwriting a part of the geojson variable
+  // Grab the selected year from the dropdown
+  let yearSelected = document.querySelector('#sel_year').value;
+  // Loop through each layer in the geojson and update its style
+  geojson.eachLayer(function(layer){
+    let application_rate = eval(`layer.feature.properties.` + yearSelected)
+    layer.setStyle({
+      fillColor: getColor(application_rate),
+      weight: 2,
+      opacity: 1,
+      color: 'white',
+      dashArray: '1',
+      fillOpacity: 0.7
+    });
+// Update the popup content
+    layer.bindPopup("State: " + layer.feature.properties.state + "<br>Applications for Name:<br>" + application_rate);
+  });
+}
+//let's stop seeing what that does!
 
-// sets the shape properties (colors, lines, etc)
-// only runs once when the map loads
-function customStyles(feature){
-let nameSelected = document.querySelector('#names').value;
-let yearSelected = document.querySelector('#years').value;
+// Set the shape properties (colors, lines, etc) - only runs once when the map loads
+function customStyles(feature) {
+  // Grab the selected name and year from the dropdowns
+  let nameSelected = document.querySelector('#names').value;
+  let yearSelected = document.querySelector('#years').value;
+
   return {
-   // fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
-    fillColor: getColor(eval(`feature.properties.CENSUSAREA`)),
+    fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
     weight: 2,
     opacity: 1,
     color: 'white',
@@ -135,18 +163,58 @@ let yearSelected = document.querySelector('#years').value;
   };
 }
 
-// only chnages the color
-// note scale does not change with dropdown change
-function getColor(d) {
-  return d > 200000   ? '#800026' :
-          d > 100000   ? '#BD0026' :
-          d > 50000   ? '#E31A1C' :
-          d > 25000   ? '#FC4E2A' :
-          d > 12500   ? '#FD8D3C' :
-          d > 6250   ? '#FEB24C' :
-          d > 3125   ? '#FED976' :
-                    '#FFEDA0';
+// Change the color based on the application rate
+function getColor(application_rate) {
+  return application_rate > 200000 ? '#800026' :
+    application_rate > 100000 ? '#BD0026' :
+    application_rate > 50000 ? '#E31A1C' :
+    application_rate > 25000 ? '#FC4E2A' :
+    application_rate > 12500 ? '#FD8D3C' :
+    application_rate > 6250 ? '#FEB24C' :
+    application_rate > 3125 ? '#FED976' :
+                '#FFEDA0';
 }
+//commenting our for now - come back later?
+// Grab data with d3
+// d3.json(geoData).then(function(data) {
+// console.log(data)
+// geojson = L.geoJson(data,{
+//   style: customStyles,
+
+
+
+// }).addTo(map);
+// })
+
+
+// sets the shape properties (colors, lines, etc)
+// only runs once when the map loads
+// function customStyles(feature){
+// let nameSelected = document.querySelector('#names').value;
+// let yearSelected = document.querySelector('#years').value;
+//   return {
+//     fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
+//     // fillColor: getColor(eval(`feature.properties.CENSUSAREA`)),
+//     weight: 2,
+//     opacity: 1,
+//     color: 'white',
+//     dashArray: '1',
+//     fillOpacity: 0.7
+//   };
+// }
+
+// // only chnages the color
+// // note scale does not change with dropdown change
+// function getColor(application_rate) {
+//   return application_rate > 200000   ? '#800026' :
+//           application_rate > 100000   ? '#BD0026' :
+//           application_rate > 50000   ? '#E31A1C' :
+//           application_rate > 25000   ? '#FC4E2A' :
+//           application_rate > 12500   ? '#FD8D3C' :
+//           application_rate > 6250   ? '#FEB24C' :
+//           application_rate > 3125   ? '#FED976' :
+//                     '#FFEDA0';
+// }
 
 
 
