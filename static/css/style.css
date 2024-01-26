@@ -33,7 +33,8 @@ body {
 
 /* map visualization, customize scale */
 #map {
-  height: 600px;
+  height: 400px;
+  width: 100%;
 }
 
 /* CSS styling for map hover */

@@ -87,149 +87,140 @@ d3.json(url_cjj).then(function(data) {
 // ***** END Jacob's part *************************
 
 
+
+
 // ***** START Joseph's Part **************************
-// get data
-// url_cjj = "/cjj"
-// // fetch and filter json data
-// d3.json(url_cjj).then(function(data) {
-//   console.log(data)
-//   const result = data.filter((item) => (item.name == name && item.year == year))
-//console.log(result)
 
-let map = L.map('map').setView([37.8, -96], 4);
+// establish map and set view, add basemap, add to event listener so we can change map with dropdown selections
+document.addEventListener('DOMContentLoaded', function(){
+  let map = L.map('map').setView([37.8, -96], 4);
 
-let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
-// Defined outside function so this variable can be used in other places in the code
-let geojson;
-
-let geoData = "C:\Users\joemd\Desktop\project-3\static\data\AllData.geojson"
-
-//let's see what this does!
-// Event Listener that enacts when the dropdown changes
-let year = document.querySelector('#sel_year');
-      year.addEventListener('change', function(){
-        //update the map based on year
-        selectDataSource(geoData)
-      });
-
-d3.json(geoData).then(function (data) {
-  // Store the GeoJSON data in the geojson variable
-  geojson = L.geoJson(data, {
-    style: customStyles,
+  let tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
-});
+  
+  // create function to load geojson data / store geojson data in a variable
+  // defined outside function so this variable can be used in other places in the code
+  function loadGeoJsonData(){
+    let geoData_path = "./static/data/AllData.geojson" // ERIN said fix this line -- I changed from absolute path to relative path, console logged
+    // fetch and filter data 
+    d3.json(geoData_path).then(function (data) {
+      console.log(data) // print data in console
+      let geojson = L.geoJson(data, {
+        style: customStyles,
+        onEachFeature: onEachFeature
+      }).addTo(map);
+      populateYearDropDown(data);
+    });
+  }
 
-// Update the map based on the selected year
-function selectDataSource(geoData){
-
-  // grabs value from dropdown - I could have used D3 instead
-  // note: this is just overwriting a part of the geojson variable
-  // Grab the selected year from the dropdown
-  let yearSelected = document.querySelector('#sel_year').value;
-  // Loop through each layer in the geojson and update its style
-  geojson.eachLayer(function(layer){
-    let application_rate = eval(`layer.feature.properties.` + yearSelected)
-    layer.setStyle({
-      fillColor: getColor(application_rate),
+  // create function to select year from drop down menu
+  function populateYearDropDown(data){
+  let years = new Set(); // use a set to avoid duplicate years
+  data.features.forEach(feature =>{
+  let name = feature.properties['Joseph'];
+  if(name){
+  Object.keys(name).forEach(year =>{
+    years.add(year);
+  });
+  
+  }
+  });
+  let yearsArray =  Array.from(years).sort(); // loop through each layer in the geojson and update
+  let yearsDropDown = d3.select("#years"); // use d3 to grab values from drop down
+  for (let i = 0; i < yearsArray.length; i++){
+    yearsDropDown.append("option")
+    .text(yearsArray[i])
+    .attr("value", yearsArray[i]);
+  }
+  }
+  
+  // create function 
+  function onEachFeature(feature, layer){ 
+  let nameSelected = document.querySelector('#names').value;
+  let yearSelected = document.querySelector('#years').value;
+  // add conditional to establish what populates in dropdown before user selection 
+  if (nameSelected === '' || yearSelected === ''){
+    nameSelected = 'Joseph';
+    yearSelected = '2022';
+  }
+  let count = 0;
+  if(feature.properties[nameSelected] && feature.properties[nameSelected][yearSelected]){
+    count = feature.properties[nameSelected][yearSelected];
+  }
+  // create pop-up so information is displayed and updated when hovering over each state
+  layer.bindPopup("State: " + feature.properties.NAME + "<br>Application Count:<br>" + count);
+  }
+ 
+  
+  // use function to set the shape properties (colors, lines, opacity, etc)
+  function customStyles(feature) {
+    // Grab the selected name and year from the dropdowns
+    let nameSelected = document.querySelector('#names').value;
+    let yearSelected = document.querySelector('#years').value;
+    if (nameSelected === '' || yearSelected === ''){
+      nameSelected = 'Joseph';
+      yearSelected = '2022';
+    }
+  
+    let count = 0;
+    if(feature.properties[nameSelected] && feature.properties[nameSelected][yearSelected]){
+    count = feature.properties[nameSelected][yearSelected];
+    }
+  
+    return {
+      fillColor: getColor(count),
       weight: 2,
       opacity: 1,
       color: 'white',
       dashArray: '1',
       fillOpacity: 0.7
-    });
-// Update the popup content
-    layer.bindPopup("State: " + layer.feature.properties.state + "<br>Applications for Name:<br>" + application_rate);
-  });
-}
-//let's stop seeing what that does!
+    };
+  }
+  
+  // create function for choropleth color selections based on range of application rates
+  // -- mess around with these, think what will work for the best visualization considering certain names are more popular than others in some years
+  function getColor(count) {
+    return count > 500 ? '#800026' :
+    count > 200 ? '#BD0026' :
+    count > 100 ? '#E31A1C' :
+    count > 50 ? '#FC4E2A' :
+    count > 20 ? '#FD8D3C' :
+    count > 10 ? '#FEB24C' :
+    count > 5 ? '#FED976' :
+                  '#FFEDA0';
+  }
+  
+// create legend 
+  let legend = L.control({position: 'bottomright'});
 
-// Set the shape properties (colors, lines, etc) - only runs once when the map loads
-function customStyles(feature) {
-  // Grab the selected name and year from the dropdowns
-  let nameSelected = document.querySelector('#names').value;
-  let yearSelected = document.querySelector('#years').value;
-
-  return {
-    fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
-    weight: 2,
-    opacity: 1,
-    color: 'white',
-    dashArray: '1',
-    fillOpacity: 0.7
+  legend.onAdd = function (map) {
+      let div = L.DomUtil.create('div', 'info legend'),
+          applicant_count = [0, 5, 10, 20, 50, 100, 200, 500], // these are the breakpoints for the data
+          labels = [],
+          from, to;
+  
+      for (let i = 0; i < applicant_count.length; i++) {
+          from = applicant_count[i];
+          to = applicant_count[i + 1];
+  
+          labels.push(
+              '<i style="background:' + getColor(from + 1) + '"></i> ' +
+              from + (to ? '&ndash;' + to : '+'));
+      }
+  
+      div.innerHTML = labels.join('<br>');
+      return div;
   };
-}
+  // add legend to map
+  legend.addTo(map);
 
-// Change the color based on the application rate
-function getColor(application_rate) {
-  return application_rate > 200000 ? '#800026' :
-    application_rate > 100000 ? '#BD0026' :
-    application_rate > 50000 ? '#E31A1C' :
-    application_rate > 25000 ? '#FC4E2A' :
-    application_rate > 12500 ? '#FD8D3C' :
-    application_rate > 6250 ? '#FEB24C' :
-    application_rate > 3125 ? '#FED976' :
-                '#FFEDA0';
-}
-//commenting our for now - come back later?
-// Grab data with d3
-// d3.json(geoData).then(function(data) {
-// console.log(data)
-// geojson = L.geoJson(data,{
-//   style: customStyles,
+  document.querySelector('#names').addEventListener('change', loadGeoJsonData);
+  document.querySelector('#years').addEventListener('change', loadGeoJsonData);
+  loadGeoJsonData();
 
-
-
-// }).addTo(map);
-// })
-
-
-// sets the shape properties (colors, lines, etc)
-// only runs once when the map loads
-// function customStyles(feature){
-// let nameSelected = document.querySelector('#names').value;
-// let yearSelected = document.querySelector('#years').value;
-//   return {
-//     fillColor: getColor(eval(`feature.properties.${nameSelected}.${yearSelected}`)),
-//     // fillColor: getColor(eval(`feature.properties.CENSUSAREA`)),
-//     weight: 2,
-//     opacity: 1,
-//     color: 'white',
-//     dashArray: '1',
-//     fillOpacity: 0.7
-//   };
-// }
-
-// // only chnages the color
-// // note scale does not change with dropdown change
-// function getColor(application_rate) {
-//   return application_rate > 200000   ? '#800026' :
-//           application_rate > 100000   ? '#BD0026' :
-//           application_rate > 50000   ? '#E31A1C' :
-//           application_rate > 25000   ? '#FC4E2A' :
-//           application_rate > 12500   ? '#FD8D3C' :
-//           application_rate > 6250   ? '#FEB24C' :
-//           application_rate > 3125   ? '#FED976' :
-//                     '#FFEDA0';
-// }
-
-
-
-// // setting choropleth colors
-// // colors along with RANGES for number of applications for the chosen name can be reset as we see fit... might not populate any meaningful visuals yet
-// function getColor(name) {
-//   return name > 1000 ? '#980043' :
-//          name > 500  ? '#dd1c77' :
-//          name > 200  ? '#df65b0' :
-//          name > 100  ? '#d7b5d8' :
-//          name > 50   ? '#f1eef6' :
-//                             '#0a0a0a';
-// }
-// // add basemap layer
-
+});
 
 
 
